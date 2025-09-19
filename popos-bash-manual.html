@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pop!_OS Operations Manual - Field Training Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(30, 30, 30, 0.95);
+            border: 1px solid #444;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 25px;
+            background: linear-gradient(90deg, #2a2a2a 0%, #1a1a1a 100%);
+            border-left: 4px solid #00b4d8;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+
+        .header .callsign {
+            font-size: 1.1em;
+            color: #00b4d8;
+            font-weight: 500;
+        }
+
+        .status-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+            padding: 25px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+        }
+
+        .status-item {
+            text-align: center;
+            padding: 15px;
+            background: #242424;
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #00b4d8;
+        }
+
+        .status-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00b4d8;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .status-label {
+            font-size: 0.85em;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .rank-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            margin: 20px 0;
+        }
+
+        .rank-insignia {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: white;
+            font-weight: bold;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        .rank-info {
+            flex: 1;
+        }
+
+        .rank-title {
+            font-size: 1.3em;
+            color: #00b4d8;
+            margin-bottom: 5px;
+        }
+
+        .rank-progress {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border: 1px solid #444;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rank-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00b4d8, #0077b6);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .mission-module {
+            margin: 30px 0;
+            border: 1px solid #333;
+            background: #1e1e1e;
+            transition: all 0.3s ease;
+        }
+
+        .mission-module.completed {
+            border-color: #00b4d8;
+            background: linear-gradient(to right, rgba(0, 180, 216, 0.05), transparent);
+        }
+
+        .mission-header {
+            background: #242424;
+            padding: 20px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #333;
+        }
+
+        .mission-header:hover {
+            background: #2a2a2a;
+        }
+
+        .mission-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #fff;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        .mission-number {
+            width: 35px;
+            height: 35px;
+            background: #333;
+            border: 2px solid #00b4d8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00b4d8;
+            font-weight: bold;
+        }
+
+        .mission-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #666;
+        }
+
+        .status-indicator.active {
+            background: #00b4d8;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .expand-icon {
+            color: #00b4d8;
+            transition: transform 0.3s ease;
+            font-size: 1.2em;
+        }
+
+        .expand-icon.open {
+            transform: rotate(180deg);
+        }
+
+        .mission-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .mission-content.show {
+            max-height: 8000px;
+            padding: 25px;
+        }
+
+        .objective-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 3px solid #00b4d8;
+        }
+
+        .objective-card h3 {
+            color: #00b4d8;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .terminal-block {
+            background: #0d0d0d;
+            color: #0f0;
+            padding: 20px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            margin: 15px 0;
+            border: 1px solid #333;
+            position: relative;
+            overflow-x: auto;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .terminal-block::before {
+            content: 'TERMINAL';
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #00b4d8;
+            color: #000;
+            padding: 2px 10px;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+
+        .copy-command {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: #333;
+            color: #00b4d8;
+            border: 1px solid #00b4d8;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .copy-command:hover {
+            background: #00b4d8;
+            color: #000;
+        }
+
+        .keybind {
+            display: inline-block;
+            background: #333;
+            color: #00b4d8;
+            padding: 4px 8px;
+            font-family: monospace;
+            margin: 0 4px;
+            border: 1px solid #444;
+            font-size: 0.9em;
+        }
+
+        .intel-box {
+            background: rgba(0, 180, 216, 0.1);
+            border: 1px solid #00b4d8;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+            padding-left: 60px;
+        }
+
+        .intel-box::before {
+            content: 'INTEL';
+            position: absolute;
+            left: 15px;
+            top: 20px;
+            color: #00b4d8;
+            font-weight: bold;
+            font-size: 0.8em;
+            writing-mode: vertical-lr;
+            letter-spacing: 2px;
+        }
+
+        .warning-box {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+            padding-left: 60px;
+        }
+
+        .warning-box::before {
+            content: 'CAUTION';
+            position: absolute;
+            left: 15px;
+            top: 20px;
+            color: #ffc107;
+            font-weight: bold;
+            font-size: 0.8em;
+            writing-mode: vertical-lr;
+            letter-spacing: 1px;
+        }
+
+        .field-notes {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .field-notes h3 {
+            color: #00b4d8;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 1.1em;
+        }
+
+        .cornell-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .cornell-cues {
+            border-right: 2px solid #333;
+            padding-right: 20px;
+        }
+
+        .cornell-cues h4 {
+            color: #00b4d8;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        .cornell-cues p {
+            color: #888;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+
+        .cornell-main h4 {
+            color: #00b4d8;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        .cornell-summary {
+            grid-column: 1 / -1;
+            border-top: 2px solid #333;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .cornell-summary h4 {
+            color: #00b4d8;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        .tactical-brief {
+            background: #242424;
+            border: 1px solid #444;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 3px solid #ffc107;
+        }
+
+        .tactical-brief h4 {
+            color: #ffc107;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-size: 1em;
+        }
+
+        .achievement-unlock {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(90deg, rgba(0, 180, 216, 0.2), transparent);
+            border: 1px solid #00b4d8;
+            color: #00b4d8;
+            padding: 10px 20px;
+            margin: 10px 0;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        .skill-check {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .skill-check h4 {
+            color: #ffc107;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .checkpoint {
+            padding: 15px;
+            background: rgba(0, 180, 216, 0.05);
+            border-left: 3px solid #00b4d8;
+            margin: 15px 0;
+        }
+
+        .checkpoint strong {
+            color: #00b4d8;
+            display: block;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+
+        ul li {
+            position: relative;
+            padding-left: 20px;
+            margin: 8px 0;
+            color: #ccc;
+        }
+
+        ul li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #00b4d8;
+        }
+
+        strong {
+            color: #fff;
+        }
+
+        code {
+            background: #333;
+            color: #00b4d8;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>POP!_OS OPERATIONS MANUAL</h1>
+                <div class="callsign">OPERATOR TRAINING PROGRAM // FIELD GUIDE v2.0</div>
+            </div>
+        </div>
+
+        <div class="status-board">
+            <div class="status-item">
+                <span class="status-value" id="missions">0/7</span>
+                <span class="status-label">Missions Complete</span>
+            </div>
+            <div class="status-item">
+                <span class="status-value" id="skills">0</span>
+                <span class="status-label">Skills Acquired</span>
+            </div>
+            <div class="status-item">
+                <span class="status-value" id="efficiency">0%</span>
+                <span class="status-label">Efficiency Rating</span>
+            </div>
+            <div class="status-item">
+                <span class="status-value" id="uptime">0d</span>
+                <span class="status-label">Training Days</span>
+            </div>
+        </div>
+
+        <div class="rank-display">
+            <div class="rank-insignia">E-1</div>
+            <div class="rank-info">
+                <div class="rank-title">Private // Entry Level Operator</div>
+                <div class="rank-progress">
+                    <div class="rank-progress-fill" style="width: 15%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mission 1: System Reconnaissance -->
+        <div class="mission-module" id="mission1">
+            <div class="mission-header" onclick="toggleMission('mission1')">
+                <div class="mission-title">
+                    <div class="mission-number">01</div>
+                    SYSTEM RECONNAISSANCE // Pop!_OS Navigation & Control
+                </div>
+                <div class="mission-status">
+                    <span class="status-indicator active"></span>
+                    <span class="expand-icon" id="arrow-mission1">▼</span>
+                </div>
+            </div>
+            <div class="mission-content" id="content-mission1">
+                <div class="objective-card">
+                    <h3>◆ PRIMARY OBJECTIVE</h3>
+                    <p>Establish complete keyboard-based control of the Pop!_OS environment. Complete a 30-minute operational period using zero mouse input.</p>
+                    
+                    <div class="checkpoint">
+                        <strong>Mission Parameters:</strong>
+                        <p>Navigate, launch, and control all system functions through keyboard operations only. This simulates emergency scenarios where peripheral devices may be compromised or unavailable.</p>
+                    </div>
+
+                    <h4>ESSENTIAL KEYBINDS // COSMIC Desktop Operations</h4>
+                    <ul>
+                        <li><span class="keybind">Super</span> Activities Overview - Central command view</li>
+                        <li><span class="keybind">Super + T</span> Terminal deployment</li>
+                        <li><span class="keybind">Super + /</span> Launcher protocol</li>
+                        <li><span class="keybind">Super + Tab</span> Application cycling</li>
+                        <li><span class="keybind">Super + Arrow Keys</span> Window tiling operations</li>
+                        <li><span class="keybind">Super + H</span> Toggle maximization</li>
+                        <li><span class="keybind">Super + Q</span> Terminate window</li>
+                        <li><span class="keybind">Super + Shift + Arrow</span> Workspace migration</li>
+                        <li><span class="keybind">Super + Ctrl + Arrow</span> Workspace navigation</li>
+                    </ul>
+
+                    <div class="intel-box">
+                        <strong>Field Intelligence:</strong> Pop!_OS 22.04+ features the COSMIC desktop with auto-tiling capability. Enable via Settings → Desktop → Window Management for automatic window organization. This significantly increases operational efficiency in multi-application scenarios.
+                    </div>
+
+                    <h4>ADVANCED FEATURES // Version 22.04+ Capabilities</h4>
+                    <ul>
+                        <li><strong>COSMIC Application Library:</strong> <span class="keybind">Super + A</span></li>
+                        <li><strong>Window Stacking:</strong> <span class="keybind">Super + S</span> - Group multiple windows in single tile</li>
+                        <li><strong>Vim-Style Navigation:</strong> <span class="keybind">Super + H/J/K/L</span> - Directional focus control</li>
+                    </ul>
+
+                    <div class="terminal-block">
+# System reconnaissance commands
+pop-shell --version                    # Verify Pop Shell version
+
+# Configure tiling behavior
+gsettings set org.gnome.shell.extensions.pop-shell tile-by-default true
+gsettings set org.gnome.shell.extensions.pop-shell gap-outer 4
+gsettings set org.gnome.shell.extensions.pop-shell gap-inner 4
+
+# System information gathering
+neofetch                               # System overview
+uname -a                              # Kernel details
+lsb_release -a                        # Distribution info
+                        <button class="copy-command" onclick="copyCode(this)">COPY</button>
+                    </div>
+                </div>
+
+                <div class="skill-check">
+                    <h4>◆ SKILL VERIFICATION</h4>
+                    <p><strong>Challenge:</strong> Execute the following sequence without mouse input:</p>
+                    <ol>
+                        <li>Open 3 applications (Terminal, Files, Settings)</li>
+                        <li>Arrange them in tiled configuration</li>
+                        <li>Navigate between them using keyboard only</li>
+                        <li>Create new workspace and move one application to it</li>
+                    </ol>
+                    <p><strong>Time Target:</strong> Under 45 seconds for Specialist rank qualification</p>
+                </div>
+
+                <div class="field-notes">
+                    <h3>◆ FIELD NOTES // Cornell Method</h3>
+                    <div class="cornell-layout">
+                        <div class="cornell-cues">
+                            <h4>Key Intel</h4>
+                            <p>COSMIC purpose?</p>
+                            <p>Tiling vs Floating?</p>
+                            <p>Stack mechanics?</p>
+                            <p>Workspace strategy?</p>
+                        </div>
+                        <div class="cornell-main">
+                            <h4>Operational Notes</h4>
+                            <p><strong>COSMIC Desktop:</strong> Custom desktop environment built on GNOME, optimized for keyboard-driven operations with auto-tiling capabilities.</p>
+                            <p><strong>Window Tiling:</strong> Automatic window organization without overlap. Manual adjustment via Super + directional keys.</p>
+                            <p><strong>Stacking:</strong> Multiple applications share single tile space. Navigate stack with Super + ` (backtick).</p>
+                            <p><strong>Workspaces:</strong> Virtual desktops for operational separation. Organize by task type or security level.</p>
+                        </div>
+                        <div class="cornell-summary">
+                            <h4>Mission Summary</h4>
+                            <p>Pop!_OS COSMIC provides military-grade efficiency through keyboard operations. Master the Super key combinations for rapid deployment. Tiling and stacking enable superior workspace management. Multiple workspaces allow operational compartmentalization.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tactical-brief">
+                    <h4>◆ Tactical Analysis // Feynman Method</h4>
+                    <p><strong>Concept: Window Tiling System</strong></p>
+                    <p><strong>Operational Analogy:</strong> Think of your screen as a tactical grid map. Window tiling divides this grid into sectors, each occupied by one application. When you press Super + Enter, the system automatically redistributes sectors for optimal coverage - like deploying units across a battlefield for maximum effectiveness. No overlap means no wasted space or hidden intelligence.</p>
+                    <p><strong>Strategic Value:</strong> Eliminates time lost in window management, maintains visual contact with all active operations, increases situational awareness.</p>
+                </div>
+
+                <div class="achievement-unlock">
+                    ✓ ACHIEVEMENT UNLOCKED: COSMIC OPERATOR
+                </div>
+            </div>
+        </div>
+
+        <!-- Mission 2: Terminal Operations -->
+        <div class="mission-module" id="mission2">
+            <div class="mission-header" onclick="toggleMission('mission2')">
+                <div class="mission-title">
+                    <div class="mission-number">02</div>
+                    TERMINAL OPERATIONS // Bash Command & Control
+                </div>
+                <div class="mission-status">
+                    <span class="status-indicator"></span>
+                    <span class="expand-icon" id="arrow-mission2">▼</span>
+                </div>
+            </div>
+            <div class="mission-content" id="content-mission2">
+                <div class="objective-card">
+                    <h3>◆ PRIMARY OBJECTIVE</h3>
+                    <p>Establish a structured file system for operational data using terminal commands exclusively. Create, navigate, and manage directories with military precision.</p>
+                    
+                    <div class="terminal-block">
+# Navigation protocols
+pwd                                    # Current position
+ls -la                                # Detailed reconnaissance  
+cd ~/Documents                        # Navigate to target
+cd -                                  # Return to previous position
+cd ..                                 # Retreat one level
+
+# Establish operational structure
+mkdir -p ~/Operations/{intel,scripts,configs,logs,backups}
+mkdir -p ~/Operations/intel/{recon,analysis,reports}
+mkdir -p ~/Operations/scripts/{automation,maintenance,security}
+
+# Visual confirmation
+tree ~/Operations                     # Display structure (apt install tree)
+
+# File operations
+touch ~/Operations/logs/$(date +%Y%m%d).log    # Create timestamped log
+cp -r source/ destination/            # Replicate directory
+mv oldname newname                    # Rename/relocate asset
+rm -i sensitive.txt                   # Secure deletion with confirmation
+
+# Advanced reconnaissance
+find ~/Operations -name "*.sh"        # Locate all shell scripts
+find . -type d -mtime -7             # Directories modified within 7 days
+grep -r "TODO" ~/Operations/         # Search for action items
+                        <button class="copy-command" onclick="copyCode(this)">COPY</button>
+                    </div>
+
+                    <h4>NAVIGATION PROTOCOLS // Advanced Techniques</h4>
+                    <div class="terminal-block">
+# Stack-based navigation
+pushd ~/Operations/scripts            # Push to stack
+pushd ~/Operations/configs            # Add another
+dirs -v                              # View navigation stack
+popd                                 # Return to previous
+
+# Configure rapid deployment paths
+export CDPATH=".:~:~/Operations:~/Projects"
+
+# Operational aliases (add to ~/.bashrc)
+alias ll='ls -alF --color=auto'
+alias la='ls -A'
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)"'
+alias ops='cd ~/Operations'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias reload='source ~/.bashrc'
+                        <button class="copy-command" onclick="copyCode(this)">COPY</button>
+                    </div>
+                </div>
+
+                <div class="intel-box">
+                    <strong>Operational Efficiency:</strong> Use <span class="keybind">Ctrl + R</span> for command history search, <span class="keybind">Ctrl + L</span> to clear screen, <span class="keybind">Tab</span> for autocompletion, and <span class="keybind">Ctrl + A/E</span> to jump to line start/end.
+                </div>
+
+                <div class="field-notes">
+                    <h3>◆ FIELD NOTES // Cornell Method</h3>
+                    <div class="cornell-layout">
+                        <div class="cornell-cues">
+                            <h4>Key Intel</h4>
+                            <p>Absolute vs Relative?</p>
+                            <p>Permission structure?</p>
+                            <p>Pipe operations?</p>
+                            <p>Wildcard usage?</p>
+                        </div>
+                        <div class="cornell-main">
+                            <h4>Operational Notes</h4>
+                            <p><strong>Path Types:</strong> Absolute paths start from root (/), relative paths from current position (./)</p>
+                            <p><strong>Permissions:</strong> Read (4), Write (2), Execute (1) - Combined for user/group/others (e.g., 755)</p>
+                            <p><strong>Pipe Operations:</strong> Chain commands using | to pass output as input</p>
+                            <p><strong>Wildcards:</strong> * (any characters), ? (single character), [abc] (character set)</p>
+                        </div>
+                        <div class="cornell-summary">
+                            <h4>Mission Summary</h4>
+                            <p>Terminal navigation requires understanding of Unix file hierarchy. Master cd, ls, and find for efficient reconnaissance. File permissions control access security. Pipes and wildcards enable complex operations with minimal commands.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="achievement-unlock">
+                    ✓ ACHIEVEMENT UNLOCKED: TERMINAL SPECIALIST
+                </div>
+            </div>
+        </div>
+
+        <!-- Mission 3: Automation Protocols -->
+        <div class="mission-module" id="mission3">
+            <div class="mission-header" onclick="toggleMission('mission3')">
+                <div class="mission-title">
+                    <div class="mission-number">03</div>
+                    AUTOMATION PROTOCOLS // Bash Scripting & System Automation
+                </div>
+                <div class="mission-status">
+                    <span class="status-indicator"></span>
+                    <span class="expand-icon" id="arrow-mission3">▼</span>
+                </div>
+            </div>
+            <div class="mission-content" id="content-mission3">
+                <div class="objective-card">
+                    <h3>◆ PRIMARY OBJECTIVE</h3>
+                    <p>Develop automated system maintenance protocols. Create battle-tested scripts for routine operations and emergency response scenarios.</p>
+                    
+                    <div class="terminal-block">
+#!/bin/bash
+# System Maintenance Protocol - maintenance.sh
+
+# Color codes for status reporting
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Operation logging
+LOG_FILE="/var/log/maintenance_$(date +%Y%m%d).log"
+log_message() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+}
+
+# System update protocol
+update_system() {
+    log_message "Initiating system update protocol"
+    sudo apt update && sudo apt upgrade -y
+    [ $? -eq 0 ] && log_message "SUCCESS: System updated" || log_message "FAILURE: Update failed"
+}
+
+# Clean operations
+clean_system() {
+    log_message "Initiating cleanup operations"
+    
+    # Package cleanup
+    sudo apt autoremove -y
+    sudo apt autoclean
+    
+    # Clear caches
+    find ~/.cache -type f -atime +7 -delete 2>/dev/null
+    
+    # Log rotation
+    sudo journalctl --vacuum-time=7d
+    
+    log_message "Cleanup operations complete"
+}
+
+# System health check
+system_health() {
+    echo -e "${GREEN}=== SYSTEM HEALTH REPORT ===${NC}"
+    
+    # Disk usage
+    echo -e "${YELLOW}Disk Usage:${NC}"
+    df -h | grep -E '^/dev/' | awk '{print $1 ": " $5 " used"}'
+    
+    # Memory status
+    echo -e "${YELLOW}Memory Status:${NC}"
+    free -h | grep Mem | awk '{print "Total: " $2 ", Used: " $3 ", Free: " $4}'
+    
+    # CPU load
+    echo -e "${YELLOW}CPU Load:${NC}"
+    uptime | awk -F'load average
